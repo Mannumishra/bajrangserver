@@ -1,5 +1,5 @@
 const express = require('express');
-const { sendOtp, verifyOtp, signup } = require('../Controllar/SignupControllar');
+const { sendOtp, verifyOtp, signup, verifyPayment } = require('../Controllar/SignupControllar');
 
 const multer = require("multer")
 const storage = multer.diskStorage({
@@ -18,5 +18,6 @@ const router = express.Router();
 router.post('/send-otp', sendOtp);
 router.post('/verify-otp', verifyOtp);
 router.post('/signup',upload.single("image"), signup);
+router.post('/payment-verification', verifyPayment);
 
 module.exports = router;
