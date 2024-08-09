@@ -13,7 +13,8 @@ const UserSchema = new mongoose.Schema({
   paymentMethod: { type: String, default: "Online" },
   donationAmount: { type: Number, required: true },
   razorpayOrderId: { type: String },
-  paymentStatus: { type: String, default: "Pending" }
+  paymentStatus: { type: String, default: "Pending" },
+  checkNumber: { type: String }
 });
 
 module.exports = mongoose.model('User', UserSchema);
