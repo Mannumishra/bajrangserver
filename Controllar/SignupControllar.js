@@ -115,62 +115,50 @@ exports.signup = async (req, res) => {
       if (req.file) {
         const imageurl = await uploadimage(req.file.path);
         user.image = imageurl;
-        try {
-          fs.unlinkSync(req.file.path);
-        } catch (unlinkError) {
-          console.error('Error deleting the file:', unlinkError);
-        }
+        fs.unlinkSync(req.file.path);
       }
-      await user.save()
+      await user.save();
       const htmlContent = createHtmlContent(user);
       htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
         if (err) {
           return res.status(500).json({ message: 'Error generating PDF' });
         }
+        // Send email to user with PDF
         await transporter.sendMail({
           from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
           to: user.email,
-          subject: 'Donate Successfully',
+          subject: 'Donation Receipt',
           text: 'Thank you for your donation!',
-          attachments: [{
-            filename: 'donation_receipt.pdf',
-            content: buffer,
-          }]
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
         });
+
+        // Send email to admin with PDF
         await transporter.sendMail({
           from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
           to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
           subject: 'Donation Received',
           text: 'A donation has been made.',
-          attachments: [{
-            filename: 'donation_receipt.pdf',
-            content: buffer,
-          }]
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
         });
-        res.status(200).json({
-          success: true,
-          message: 'User donation successfully.',
-        });
+
+        res.status(200).json({ success: true, message: 'User donation successful.' });
       });
     } else {
+      // Online payment flow
       const options = {
         amount: donationAmount * 100,
         currency: "INR",
         receipt: `receipt_${Date.now()}`,
         payment_capture: 1
       };
-      const order = await razorpay.orders.create(options); // Use razorpay here
+      const order = await razorpay.orders.create(options);
       const user = new User({ title, name, paranrsName, email, phone, address, city, state, paymentMethod, donationAmount });
       if (req.file) {
         const imageurl = await uploadimage(req.file.path);
         user.image = imageurl;
-        try {
-          fs.unlinkSync(req.file.path);
-        } catch (unlinkError) {
-          console.error('Error deleting the file:', unlinkError);
-        }
+        fs.unlinkSync(req.file.path);
       }
-      await user.save()
+      await user.save();
       user.razorpayOrderId = order.id;
       res.status(200).json({
         success: true,
@@ -186,7 +174,7 @@ exports.signup = async (req, res) => {
   }
 };
 
-// Step 3: Payment verification endpoint
+// Payment verification endpoint
 exports.verifyPayment = async (req, res) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature, userId } = req.body;
   try {
@@ -194,16 +182,20 @@ exports.verifyPayment = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
     }
-    const generated_signature = crypto.createHmac('sha256', 'Q79P6w7erUar31TwW4GLAkpa')
+
+    const generated_signature = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || "Q79P6w7erUar31TwW4GLAkpa")
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex');
+
     if (generated_signature !== razorpay_signature) {
       return res.status(400).json({ message: 'Invalid signature' });
     }
+
     user.razorpayPaymentId = razorpay_payment_id;
     user.razorpayOrderId = razorpay_order_id;
     user.paymentStatus = 'Completed';
     await user.save();
+
     const htmlContent = createHtmlContent(user);
     htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
       if (err) {
@@ -214,21 +206,17 @@ exports.verifyPayment = async (req, res) => {
         to: user.email,
         subject: 'Donation Receipt',
         text: 'Thank you for your donation!',
-        attachments: [{
-          filename: 'donation_receipt.pdf',
-          content: buffer,
-        }]
+        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
       });
+
       await transporter.sendMail({
         from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
         to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
         subject: 'Donation Received',
         text: 'A donation has been made.',
-        attachments: [{
-          filename: 'donation_receipt.pdf',
-          content: buffer,
-        }]
+        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
       });
+
       res.status(200).json({
         success: true,
         message: 'Payment verified successfully and user updated.',
