@@ -7,6 +7,7 @@ const { uploadimage } = require('../Utils/Cloudnary');
 const htmlToPdf = require('html-pdf');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const puppeteer = require('puppeteer');
 
 
 const transporter = nodemailer.createTransport({
