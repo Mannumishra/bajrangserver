@@ -12,6 +12,9 @@ app.set(express.static("Public"))
 app.use(express.urlencoded({ extended: true }))
 app.use("/api", router)
 
+app.get("/" ,async(req,res)=>{
+    res.send("Welcome")
+})
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running at ${process.env.PORT} port`)
