@@ -123,17 +123,13 @@ exports.signup = async (req, res) => {
   </div>
 `
       try {
-        const buffer = await new Promise((resolve, reject) => {
-          htmlToPdf.create(htmlContent).toBuffer((err, buffer) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(buffer);
-            }
-          });
-        });
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+        await page.setContent(htmlContent);
+        const buffer = await page.pdf({ format: 'A4' });
+        await browser.close();
 
-        // Send email to user
+        // उपयोगकर्ता को ईमेल भेजें
         await transporter.sendMail({
           from: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
           to: user.email,
@@ -142,7 +138,7 @@ exports.signup = async (req, res) => {
           attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
         });
 
-        // Send email to admin
+        // प्रशासन को ईमेल भेजें
         await transporter.sendMail({
           from: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
           to: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
@@ -152,9 +148,9 @@ exports.signup = async (req, res) => {
         });
 
         res.status(200).json({ success: true, message: 'User donation successful.' });
-      } catch (emailErr) {
-        console.error('Error sending email:', emailErr);
-        res.status(500).json({ message: 'Error sending email', err: emailErr });
+      } catch (pdfErr) {
+        console.error('Error generating PDF:', pdfErr);
+        res.status(500).json({ message: 'Error generating PDF', err: pdfErr });
       }
     } else {
       const options = {
