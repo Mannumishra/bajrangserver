@@ -13,10 +13,11 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   auth: {
-    user: process.env.EMAIL_SED,
-    pass: process.env.EMAIL_PASS
+    user: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+    pass: process.env.EMAIL_PASS || "zmkm jaky wltr tlhp"
   }
 });
+
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
@@ -30,7 +31,7 @@ exports.sendOtp = async (req, res) => {
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     await Otp.create({ email, otp });
     await transporter.sendMail({
-      from: 'mannu22072000@gmail.com',
+      from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
       to: email,
       subject: 'Your OTP Code',
       text: `Your OTP code is ${otp}`
@@ -38,6 +39,7 @@ exports.sendOtp = async (req, res) => {
 
     res.status(200).json({ message: 'OTP sent to your email' });
   } catch (err) {
+    console.log(err)
     if (err.response && err.response.includes('address not found')) {
       return res.status(400).json({ message: 'Email address not found' });
     }
@@ -126,7 +128,7 @@ exports.signup = async (req, res) => {
           return res.status(500).json({ message: 'Error generating PDF' });
         }
         await transporter.sendMail({
-          from: 'mannu22072000@gmail.com',
+          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
           to: user.email,
           subject: 'Donate Successfully',
           text: 'Thank you for your donation!',
@@ -136,8 +138,8 @@ exports.signup = async (req, res) => {
           }]
         });
         await transporter.sendMail({
-          from: 'mannu22072000@gmail.com',
-          to: "mannu22072000@gmail.com",
+          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+          to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
           subject: 'Donation Received',
           text: 'A donation has been made.',
           attachments: [{
@@ -208,7 +210,7 @@ exports.verifyPayment = async (req, res) => {
         return res.status(500).json({ message: 'Error generating PDF' });
       }
       await transporter.sendMail({
-        from: 'mannu22072000@gmail.com',
+        from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
         to: user.email,
         subject: 'Donation Receipt',
         text: 'Thank you for your donation!',
@@ -218,8 +220,8 @@ exports.verifyPayment = async (req, res) => {
         }]
       });
       await transporter.sendMail({
-        from: 'mannu22072000@gmail.com',
-        to: "mannu22072000@gmail.com",
+        from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+        to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
         subject: 'Donation Received',
         text: 'A donation has been made.',
         attachments: [{

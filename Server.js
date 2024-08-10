@@ -14,6 +14,6 @@ app.use("/api", router)
 
 
 app.listen(process.env.PORT, () => {
-    console.log(`Server is running at${process.env.PORT} port`)
+    console.log(`Server is running at ${process.env.PORT} port`)
 })
 connectdb()
