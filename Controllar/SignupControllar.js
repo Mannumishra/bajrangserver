@@ -122,35 +122,40 @@ exports.signup = async (req, res) => {
       </div>
   </div>
 `
-      htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
-        if (err) {
-          console.error('Error generating PDF:', err);
-          return res.status(500).json({ message: 'Error generating PDF' });
-        }
-
-        try {
-          await transporter.sendMail({
-            from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-            to: user.email,
-            subject: 'Donation Receipt',
-            text: 'Thank you for your donation!',
-            attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+      try {
+        const buffer = await new Promise((resolve, reject) => {
+          htmlToPdf.create(htmlContent).toBuffer((err, buffer) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(buffer);
+            }
           });
+        });
 
-          await transporter.sendMail({
-            from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-            to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-            subject: 'Donation Received',
-            text: 'A donation has been made.',
-            attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
-          });
+        // Send email to user
+        await transporter.sendMail({
+          from: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
+          to: user.email,
+          subject: 'Donation Receipt',
+          text: 'Thank you for your donation!',
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+        });
 
-          res.status(200).json({ success: true, message: 'User donation successful.' });
-        } catch (emailErr) {
-          console.error('Error sending email:', emailErr);
-          res.status(500).json({ message: 'Error sending email' });
-        }
-      });
+        // Send email to admin
+        await transporter.sendMail({
+          from: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
+          to: process.env.EMAIL_SEND || 'mannu22072000@gmail.com',
+          subject: 'Donation Received',
+          text: 'A donation has been made.',
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+        });
+
+        res.status(200).json({ success: true, message: 'User donation successful.' });
+      } catch (emailErr) {
+        console.error('Error sending email:', emailErr);
+        res.status(500).json({ message: 'Error sending email', err: emailErr });
+      }
     } else {
       const options = {
         amount: donationAmount * 100,
