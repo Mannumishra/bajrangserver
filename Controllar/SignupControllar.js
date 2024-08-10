@@ -110,56 +110,59 @@ const createHtmlContent = (user) => `
 exports.signup = async (req, res) => {
   const { title, name, email, paranrsName, phone, address, city, state, paymentMethod, donationAmount, checkNumber } = req.body;
   try {
+    const user = new User({ title, name, paranrsName, email, phone, address, city, state, paymentMethod, checkNumber, donationAmount });
+    
+    if (req.file) {
+      const imageurl = await uploadimage(req.file.path);
+      user.image = imageurl;
+      fs.unlinkSync(req.file.path);
+    }
+    
+    await user.save();
+    
     if (paymentMethod === "Offline") {
-      const user = new User({ title, name, paranrsName, email, phone, address, city, state, paymentMethod, checkNumber, donationAmount });
-      if (req.file) {
-        const imageurl = await uploadimage(req.file.path);
-        user.image = imageurl;
-        fs.unlinkSync(req.file.path);
-      }
-      await user.save();
       const htmlContent = createHtmlContent(user);
       htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
         if (err) {
+          console.error('Error generating PDF:', err);
           return res.status(500).json({ message: 'Error generating PDF' });
         }
-        // Send email to user with PDF
-        await transporter.sendMail({
-          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-          to: user.email,
-          subject: 'Donation Receipt',
-          text: 'Thank you for your donation!',
-          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
-        });
 
-        // Send email to admin with PDF
-        await transporter.sendMail({
-          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-          to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-          subject: 'Donation Received',
-          text: 'A donation has been made.',
-          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
-        });
-
-        res.status(200).json({ success: true, message: 'User donation successful.' });
+        try {
+          await transporter.sendMail({
+            from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+            to: user.email,
+            subject: 'Donation Receipt',
+            text: 'Thank you for your donation!',
+            attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+          });
+  
+          await transporter.sendMail({
+            from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+            to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+            subject: 'Donation Received',
+            text: 'A donation has been made.',
+            attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+          });
+  
+          res.status(200).json({ success: true, message: 'User donation successful.' });
+        } catch (emailErr) {
+          console.error('Error sending email:', emailErr);
+          res.status(500).json({ message: 'Error sending email' });
+        }
       });
     } else {
-      // Online payment flow
       const options = {
         amount: donationAmount * 100,
         currency: "INR",
         receipt: `receipt_${Date.now()}`,
         payment_capture: 1
       };
+      
       const order = await razorpay.orders.create(options);
-      const user = new User({ title, name, paranrsName, email, phone, address, city, state, paymentMethod, donationAmount });
-      if (req.file) {
-        const imageurl = await uploadimage(req.file.path);
-        user.image = imageurl;
-        fs.unlinkSync(req.file.path);
-      }
-      await user.save();
       user.razorpayOrderId = order.id;
+      await user.save();
+      
       res.status(200).json({
         success: true,
         message: 'User registered successfully. Please complete the payment.',
@@ -169,12 +172,11 @@ exports.signup = async (req, res) => {
       });
     }
   } catch (err) {
-    console.log(err);
+    console.error('Error registering user:', err);
     res.status(500).json({ message: 'Error registering user' });
   }
 };
 
-// Payment verification endpoint
 exports.verifyPayment = async (req, res) => {
   const { razorpay_payment_id, razorpay_order_id, razorpay_signature, userId } = req.body;
   try {
@@ -199,31 +201,38 @@ exports.verifyPayment = async (req, res) => {
     const htmlContent = createHtmlContent(user);
     htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
       if (err) {
+        console.error('Error generating PDF:', err);
         return res.status(500).json({ message: 'Error generating PDF' });
       }
-      await transporter.sendMail({
-        from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-        to: user.email,
-        subject: 'Donation Receipt',
-        text: 'Thank you for your donation!',
-        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
-      });
+      
+      try {
+        await transporter.sendMail({
+          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+          to: user.email,
+          subject: 'Donation Receipt',
+          text: 'Thank you for your donation!',
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+        });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-        to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-        subject: 'Donation Received',
-        text: 'A donation has been made.',
-        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
-      });
+        await transporter.sendMail({
+          from: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+          to: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
+          subject: 'Donation Received',
+          text: 'A donation has been made.',
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }]
+        });
 
-      res.status(200).json({
-        success: true,
-        message: 'Payment verified successfully and user updated.',
-      });
+        res.status(200).json({
+          success: true,
+          message: 'Payment verified successfully and user updated.',
+        });
+      } catch (emailErr) {
+        console.error('Error sending email:', emailErr);
+        res.status(500).json({ message: 'Error sending email' });
+      }
     });
   } catch (err) {
-    console.log(err);
+    console.error('Error verifying payment:', err);
     res.status(500).json({ message: 'Error verifying payment' });
   }
 };
