@@ -12,8 +12,8 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   auth: {
-    user: process.env.EMAIL_SEND,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+    pass: process.env.EMAIL_PASS || "uyow ripi dqpz jcjp",
   }
 });
 
@@ -23,6 +23,7 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || "c40PdeTNa6zHKHRxxPoXtfqp",
 });
 
+
 exports.sendOtp = async (req, res) => {
   const { email } = req.body;
   try {
@@ -30,7 +31,7 @@ exports.sendOtp = async (req, res) => {
     await Otp.create({ email, otp });
 
     await transporter.sendMail({
-      from: process.env.EMAIL_SEND,
+      from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       to: email,
       subject: 'Your OTP Code',
       text: `Your OTP code is ${otp}`
@@ -156,7 +157,7 @@ exports.signup = async (req, res) => {
 
         // Send Email with PDF attachment
         const mailOptions = {
-          from: process.env.EMAIL_SEND,
+          from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           to: user.email,
           subject: 'Donation Receipt',
           text: 'Thank you for your donation!',
@@ -164,8 +165,8 @@ exports.signup = async (req, res) => {
         };
 
         const adminMailOptions = {
-          from: process.env.EMAIL_SEND,
-          to: process.env.EMAIL_SEND,
+          from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+          to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           subject: 'Donation Received',
           text: 'A donation has been made.',
           attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
@@ -227,7 +228,7 @@ exports.paymentVerification = async (req, res) => {
       }
 
       const mailOptions = {
-        from: process.env.EMAIL_SEND,
+        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
         subject: 'Donation Receipt',
         text: 'Thank you for your donation!',
@@ -235,8 +236,8 @@ exports.paymentVerification = async (req, res) => {
       };
 
       const adminMailOptions = {
-        from: process.env.EMAIL_SEND,
-        to: process.env.EMAIL_SEND,
+        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+        to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'Donation Received',
         text: 'A donation has been made.',
         attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
