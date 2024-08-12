@@ -12,15 +12,15 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
   auth: {
-    user: process.env.EMAIL_SEND || "mannu22072000@gmail.com",
-    pass: process.env.EMAIL_PASS || "zmkm jaky wltr tlhp",
+    user: process.env.EMAIL_SEND,
+    pass: process.env.EMAIL_PASS,
   }
 });
 
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "rzp_test_XPcfzOlm39oYi8",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "Q79P6w7erUar31TwW4GLAkpa",
+  key_id: process.env.RAZORPAY_KEY_ID || "rzp_live_nBUB1UpgrIMZ2m",
+  key_secret: process.env.RAZORPAY_KEY_SECRET || "c40PdeTNa6zHKHRxxPoXtfqp",
 });
 
 exports.sendOtp = async (req, res) => {
@@ -206,7 +206,7 @@ exports.paymentVerification = async (req, res) => {
     }
 
     // Verify payment signature
-    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "Q79P6w7erUar31TwW4GLAkpa");
+    const hmac = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "c40PdeTNa6zHKHRxxPoXtfqp");
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generatedSignature = hmac.digest("hex");
 
