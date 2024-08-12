@@ -159,16 +159,23 @@ exports.signup = async (req, res) => {
         const mailOptions = {
           from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           to: user.email,
-          subject: 'Donation Receipt',
-          text: 'Thank you for your donation!',
+          subject: 'Thank You for Joining Bajrang Vahini Dal',
+          text: `Dear [${user.name}],
+                 I hope this message finds you well.
+                 On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
+                 Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
+                 Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
+                 Warm regards, 
+                 Bajrang Vahini Dal
+          `,
           attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
         };
 
         const adminMailOptions = {
           from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-          subject: 'Donation Received',
-          text: 'A donation has been made.',
+          subject: 'New Member Request And Receipt',
+          text: 'A new member registration done successfully, please check the attachment of receipt.',
           attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
         };
 
@@ -230,16 +237,23 @@ exports.paymentVerification = async (req, res) => {
       const mailOptions = {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
-        subject: 'Donation Receipt',
-        text: 'Thank you for your donation!',
+        subject: 'Thank You for Joining Bajrang Vahini Dal',
+        text: `Dear [${user.name}],
+                 I hope this message finds you well.
+                 On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
+                 Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
+                 Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
+                 Warm regards, 
+                 Bajrang Vahini Dal
+          `,
         attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
       };
 
       const adminMailOptions = {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-        subject: 'Donation Received',
-        text: 'A donation has been made.',
+        subject: 'New Member Request And Receipt',
+        text: 'A new member registration done successfully, please check the attachment of receipt.',
         attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
       };
 
