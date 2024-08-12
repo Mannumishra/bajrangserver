@@ -149,12 +149,14 @@ exports.signup = async (req, res) => {
     // Handle Offline Payment
     if (paymentMethod === "Offline") {
       const htmlContent = createHtmlContent(user);
-      await htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
+      const pdfOptions = { format: 'Letter' };
+      await htmlToPdf.create(htmlContent, pdfOptions).toFile('./receipt.pdf', async (err, result) => {
         if (err) {
           console.error('Error generating PDF:', err);
           return res.status(500).json({ message: 'Error generating PDF' });
         }
 
+        const pdfBuffer = fs.readFileSync(result.filename);
         // Send Email with PDF attachment
         const mailOptions = {
           from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
@@ -168,7 +170,7 @@ exports.signup = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
+          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
         };
 
         const adminMailOptions = {
@@ -176,12 +178,12 @@ exports.signup = async (req, res) => {
           to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           subject: 'New Member Request And Receipt',
           text: 'A new member registration done successfully, please check the attachment of receipt.',
-          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
+          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
         };
 
         await transporter.sendMail(mailOptions);
         await transporter.sendMail(adminMailOptions);
-
+        fs.unlinkSync(result.filename);
         res.status(200).json({ success: true, message: 'User donation successful.' });
       });
     } else {
@@ -228,12 +230,13 @@ exports.paymentVerification = async (req, res) => {
 
     // Create and send PDF receipt
     const htmlContent = createHtmlContent(user);
-    await htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
+    const pdfOptions = { format: 'Letter' };
+    await htmlToPdf.create(htmlContent, pdfOptions).toFile('./receipt.pdf', async (err, result) => {
       if (err) {
         console.error('Error generating PDF:', err);
         return res.status(500).json({ message: 'Error generating PDF' });
       }
-
+      const pdfBuffer = fs.readFileSync(result.filename);
       const mailOptions = {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
@@ -246,7 +249,7 @@ exports.paymentVerification = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
+        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
       };
 
       const adminMailOptions = {
@@ -254,12 +257,11 @@ exports.paymentVerification = async (req, res) => {
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
         text: 'A new member registration done successfully, please check the attachment of receipt.',
-        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
+        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
       };
-
       await transporter.sendMail(mailOptions);
       await transporter.sendMail(adminMailOptions);
-
+      fs.unlinkSync(result.filename);
       res.status(200).json({ success: true, message: 'Payment verified and receipt sent.' });
     });
   } catch (err) {
