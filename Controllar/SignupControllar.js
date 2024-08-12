@@ -77,43 +77,7 @@ const createHtmlContent = (user) => `
           <label style="font-size: 16px; color: #000;">पता:</label>
           <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.address}</p>
       </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">दूरभाष:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.phone}</p>
-      </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">ई मेल:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.email}</p>
-      </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">माता/पिता का नाम:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.paranrsName}</p>
-      </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">राशि (शब्दों में):</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.donationAmount}</p>
-      </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">नकद/ड्राफ्ट/डिजिटल/चेक नं:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.paymentMethod}</p>
-      </div>
-      ${user.paymentMethod === 'Online' ? `
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">पेमेंट आईडी:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.razorpayOrderId}</p>
-      </div>` : ''}
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">आधार कार्ड नंबर:</label>
-          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.adharnumber}</p>
-      </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
-          <img src="${user.adharcardFront}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
-      </div>
-       <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
-          <img src="${user.adharcardBack}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
-      </div>
+     
       <div style="text-align: right; margin-top: 20px;">
           <img src="https://res.cloudinary.com/dsimn9z1r/image/upload/fl_preserve_transparency/v1723179469/WhatsApp_Image_2024-08-09_at_10.19.27-removebg_ozu41s.jpg?_s=public-apps" alt="Signature" style="width: 100px; height: auto; margin-bottom: 5px;">
           <p style="font-size: 18px; color: #000;">अधिकृत हस्ताक्षर</p>
