@@ -6,7 +6,7 @@ const { uploadimage } = require('../Utils/Cloudnary');
 const htmlToPdf = require('html-pdf');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-
+require('dotenv').config()
 // Initialize Nodemailer
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -77,7 +77,43 @@ const createHtmlContent = (user) => `
           <label style="font-size: 16px; color: #000;">पता:</label>
           <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.address}</p>
       </div>
-     
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">दूरभाष:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.phone}</p>
+      </div>
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">ई मेल:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.email}</p>
+      </div>
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">माता/पिता का नाम:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.paranrsName}</p>
+      </div>
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">राशि (शब्दों में):</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.donationAmount}</p>
+      </div>
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">नकद/ड्राफ्ट/डिजिटल/चेक नं:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.paymentMethod}</p>
+      </div>
+      ${user.paymentMethod === 'Online' ? `
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">पेमेंट आईडी:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.razorpayOrderId}</p>
+      </div>` : ''}
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">आधार कार्ड नंबर:</label>
+          <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.adharnumber}</p>
+      </div>
+      <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
+          <img src="${user.adharcardFront}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
+      </div>
+       <div style="margin-bottom: 15px;">
+          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
+          <img src="${user.adharcardBack}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
+      </div>
       <div style="text-align: right; margin-top: 20px;">
           <img src="https://res.cloudinary.com/dsimn9z1r/image/upload/fl_preserve_transparency/v1723179469/WhatsApp_Image_2024-08-09_at_10.19.27-removebg_ozu41s.jpg?_s=public-apps" alt="Signature" style="width: 100px; height: auto; margin-bottom: 5px;">
           <p style="font-size: 18px; color: #000;">अधिकृत हस्ताक्षर</p>
@@ -85,9 +121,9 @@ const createHtmlContent = (user) => `
   </div>
 `;
 
-
 exports.signup = async (req, res) => {
   const { title, name, email, paranrsName, phone, address, city, state, paymentMethod, donationAmount, checkNumber, adharnumber } = req.body;
+  
   try {
     const user = new User({ title, name, paranrsName, email, phone, address, city, state, paymentMethod, checkNumber, donationAmount, adharnumber });
 
@@ -113,61 +149,73 @@ exports.signup = async (req, res) => {
     // Handle Offline Payment
     if (paymentMethod === "Offline") {
       const htmlContent = createHtmlContent(user);
-      const pdfOptions = { format: 'Letter' };
-      await htmlToPdf.create(htmlContent, pdfOptions).toFile('./receipt.pdf', async (err, result) => {
+      await htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
         if (err) {
           console.error('Error generating PDF:', err);
           return res.status(500).json({ message: 'Error generating PDF' });
         }
 
-        const pdfBuffer = fs.readFileSync(result.filename);
         // Send Email with PDF attachment
         const mailOptions = {
           from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           to: user.email,
           subject: 'Thank You for Joining Bajrang Vahini Dal',
-          text: `Dear [${user.name}],
+          text: `Dear ${user.name},
                  I hope this message finds you well.
                  On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
                  Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
                  Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
                  Warm regards, 
-                 Bajrang Vahini Dal
-          `,
-          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+                 Bajrang Vahini Dal`,
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
         };
 
         const adminMailOptions = {
           from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
           to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-          subject: 'New Member Request And Receipt',
-          text: 'A new member registration done successfully, please check the attachment of receipt.',
-          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+          subject: 'New Member Registration - Bajrang Vahini Dal',
+          text: `A new member has registered. 
+                 Name: ${user.name}
+                 Email: ${user.email}`,
+          attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
         };
+
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: {
+            user: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+            pass: process.env.PASSWORD_SEND || "your_password_here",
+          },
+        });
 
         await transporter.sendMail(mailOptions);
         await transporter.sendMail(adminMailOptions);
-        fs.unlinkSync(result.filename);
-        res.status(200).json({ success: true, message: 'User donation successful.' });
+
+        res.status(200).json({ success: true, message: 'Member registered successfully!' });
       });
-    } else {
-      // Handle Online Payment
-      const options = {
+
+    } else if (paymentMethod === "Online") {
+      const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_SECRET,
+      });
+
+      const orderOptions = {
         amount: donationAmount * 100, // Amount in paise
-        currency: "INR",
-        receipt: user._id.toString(),
+        currency: 'INR',
+        receipt: `receipt_${user._id}`,
       };
 
-      const order = await razorpay.orders.create(options);
+      const order = await razorpay.orders.create(orderOptions);
 
       user.razorpayOrderId = order.id;
       await user.save();
 
-      res.status(200).json({ success: true, message: 'Order created successfully.', orderId: order.id });
+      res.status(200).json({ success: true, orderId: order.id });
     }
   } catch (err) {
-    console.error('Error in signup:', err);
-    res.status(500).json({ success: false, message: 'Signup failed.' });
+    console.error('Error in signup route:', err);
+    res.status(500).json({ success: false, message: 'Something went wrong' });
   }
 };
 
@@ -194,13 +242,11 @@ exports.paymentVerification = async (req, res) => {
 
     // Create and send PDF receipt
     const htmlContent = createHtmlContent(user);
-    const pdfOptions = { format: 'Letter' };
-    await htmlToPdf.create(htmlContent, pdfOptions).toFile('./receipt.pdf', async (err, result) => {
+    await htmlToPdf.create(htmlContent).toBuffer(async (err, buffer) => {
       if (err) {
         console.error('Error generating PDF:', err);
         return res.status(500).json({ message: 'Error generating PDF' });
       }
-      const pdfBuffer = fs.readFileSync(result.filename);
       const mailOptions = {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
@@ -213,7 +259,7 @@ exports.paymentVerification = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
       };
 
       const adminMailOptions = {
@@ -221,11 +267,10 @@ exports.paymentVerification = async (req, res) => {
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
         text: 'A new member registration done successfully, please check the attachment of receipt.',
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+        attachments: [{ filename: 'donation_receipt.pdf', content: buffer }],
       };
       await transporter.sendMail(mailOptions);
       await transporter.sendMail(adminMailOptions);
-      fs.unlinkSync(result.filename);
       res.status(200).json({ success: true, message: 'Payment verified and receipt sent.' });
     });
   } catch (err) {
