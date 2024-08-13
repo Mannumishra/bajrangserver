@@ -3,6 +3,7 @@ const { connectdb } = require("./Database/ConnectDb")
 const cors = require("cors")
 const router = require("./Routes/signupRoutes")
 const dotenv = require("dotenv")
+const slipRouter = require("./Routes/ReciptRouter")
 dotenv.config()
 
 const app = express()
@@ -11,6 +12,7 @@ app.use(express.json())
 app.set(express.static("Public"))
 app.use(express.urlencoded({ extended: true }))
 app.use("/api", router)
+app.use("/api", slipRouter)
 
 app.get("/" ,async(req,res)=>{
     res.send("Welcome")

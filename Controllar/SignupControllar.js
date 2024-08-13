@@ -157,12 +157,12 @@ exports.signup = async (req, res) => {
       const pdfBuffer = await page.pdf({ format: 'A4' });
       await browser.close();
 
-        // Send Email with PDF attachment
-        const mailOptions = {
-          from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-          to: user.email,
-          subject: 'Thank You for Joining Bajrang Vahini Dal',
-          text: `Dear [${user.name}],
+      // Send Email with PDF attachment
+      const mailOptions = {
+        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+        to: user.email,
+        subject: 'Thank You for Joining Bajrang Vahini Dal',
+        text: `Dear [${user.name}],
                  I hope this message finds you well.
                  On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
                  Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
@@ -170,21 +170,21 @@ exports.signup = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
-        };
+        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+      };
 
-        const adminMailOptions = {
-          from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-          to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-          subject: 'New Member Request And Receipt',
-          text: 'A new member registration done successfully, please check the attachment of receipt.',
-          attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
-        };
+      const adminMailOptions = {
+        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+        to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+        subject: 'New Member Request And Receipt',
+        text: 'A new member registration done successfully, please check the attachment of receipt.',
+        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+      };
 
-        await transporter.sendMail(mailOptions);
-        await transporter.sendMail(adminMailOptions);
+      await transporter.sendMail(mailOptions);
+      await transporter.sendMail(adminMailOptions);
 
-        res.status(200).json({ success: true, message: 'User donation successful.' });
+      res.status(200).json({ success: true, message: 'User donation successful.' });
     } else {
       // Handle Online Payment
       const options = {
@@ -230,17 +230,17 @@ exports.paymentVerification = async (req, res) => {
     // Create and send PDF receipt
     const htmlContent = createHtmlContent(user);
 
-      // Use Puppeteer to generate PDF
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
-      await page.setContent(htmlContent);
-      const pdfBuffer = await page.pdf({ format: 'A4' });
-      await browser.close();
-      const mailOptions = {
-        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-        to: user.email,
-        subject: 'Thank You for Joining Bajrang Vahini Dal',
-        text: `Dear [${user.name}],
+    // Use Puppeteer to generate PDF
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    const pdfBuffer = await page.pdf({ format: 'A4' });
+    await browser.close();
+    const mailOptions = {
+      from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+      to: user.email,
+      subject: 'Thank You for Joining Bajrang Vahini Dal',
+      text: `Dear [${user.name}],
                  I hope this message finds you well.
                  On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
                  Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
@@ -248,21 +248,64 @@ exports.paymentVerification = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
-      };
+      attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+    };
 
-      const adminMailOptions = {
-        from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-        to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
-        subject: 'New Member Request And Receipt',
-        text: 'A new member registration done successfully, please check the attachment of receipt.',
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
-      };
-      await transporter.sendMail(mailOptions);
-      await transporter.sendMail(adminMailOptions);
-      res.status(200).json({ success: true, message: 'Payment verified and receipt sent.' });
+    const adminMailOptions = {
+      from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+      to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
+      subject: 'New Member Request And Receipt',
+      text: 'A new member registration done successfully, please check the attachment of receipt.',
+      attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+    };
+    await transporter.sendMail(mailOptions);
+    await transporter.sendMail(adminMailOptions);
+    res.status(200).json({ success: true, message: 'Payment verified and receipt sent.' });
   } catch (err) {
     console.error('Error verifying payment:', err);
     res.status(500).json({ message: 'Payment verification failed' });
   }
 };
+
+
+exports.getRecord = async (req, res) => {
+  try {
+    const data = await User.find()
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "REcord Not Found"
+      })
+    }
+    else {
+      res.status(200).json({
+        success: true,
+        message: "User Found successfully",
+        data: data
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+exports.getSingleRecord = async (req, res) => {
+  try {
+    const data = await User.findOne({ _id: req.params._id })
+    if (!data) {
+      return res.status(404).json({
+        success: false,
+        message: "REcord Not Found"
+      })
+    }
+    else {
+      res.status(200).json({
+        success: true,
+        message: "User Found successfully",
+        data: data
+      })
+    }
+  } catch (error) {
+    console.log(error)
+  }
+}

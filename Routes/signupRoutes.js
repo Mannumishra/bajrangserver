@@ -1,5 +1,5 @@
 const express = require('express');
-const { sendOtp, verifyOtp, signup, paymentVerification } = require('../Controllar/SignupControllar');
+const { sendOtp, verifyOtp, signup, paymentVerification, getRecord, getSingleRecord } = require('../Controllar/SignupControllar');
 
 const multer = require("multer")
 const storage = multer.diskStorage({
@@ -23,5 +23,7 @@ router.post('/signup', upload.fields([
     { name: "adharcardBack", maxCount: 1 },
 ]), signup);
 router.post('/payment-verification', paymentVerification);
+router.get('/signup', getRecord);
+router.get('/signup/:_id', getSingleRecord);
 
 module.exports = router;
