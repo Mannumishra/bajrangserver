@@ -184,7 +184,7 @@ exports.signup = async (req, res) => {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
-        text: `A new member registration done successfully, please check the attachment of receipt.`,
+        text: `A new member registration done successfully.`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -312,7 +312,7 @@ exports.paymentVerification = async (req, res) => {
       from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       subject: 'New Member Request And Receipt',
-      text: `A new member registration done successfully, please check the attachment of receipt.`,
+      text: `A new member registration done successfully.`,
     };
 
     await transporter.sendMail(mailOptions);
