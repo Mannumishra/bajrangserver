@@ -18,6 +18,7 @@ const gentrateSlip = async (req, res) => {
         const { email } = req.body;
         if (req.file) {
             const receiptPath = path.join(__dirname, "../Public/Images", req.file.filename);
+            console.log("Saving file to:", receiptPath);
             const data = new recipt({
                 email: email,
                 file: `/Public/Images/${req.file.filename}`  
