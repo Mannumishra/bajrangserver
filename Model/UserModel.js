@@ -18,6 +18,6 @@ const UserSchema = new mongoose.Schema({
   razorpayOrderId: { type: String },
   paymentStatus: { type: String, default: "Pending" },
   checkNumber: { type: String }
-});
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);
