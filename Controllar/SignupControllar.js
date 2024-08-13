@@ -160,7 +160,7 @@ exports.signup = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-        message: htmlContent
+        html: htmlContent
       };
 
       const adminMailOptions = {
@@ -168,7 +168,7 @@ exports.signup = async (req, res) => {
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
         text: 'A new member registration done successfully, please check the attachment of receipt.',
-        message: htmlContent
+        html: htmlContent
       };
 
       await transporter.sendMail(mailOptions);
@@ -231,7 +231,7 @@ exports.paymentVerification = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-      message: htmlContent
+      html: htmlContent
     };
 
     const adminMailOptions = {
@@ -239,7 +239,7 @@ exports.paymentVerification = async (req, res) => {
       to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       subject: 'New Member Request And Receipt',
       text: 'A new member registration done successfully, please check the attachment of receipt.',
-      message: htmlContent
+      html: htmlContent
     };
     await transporter.sendMail(mailOptions);
     await transporter.sendMail(adminMailOptions);
