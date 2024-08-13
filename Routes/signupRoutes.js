@@ -5,6 +5,7 @@ const multer = require("multer")
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = './Public/Images';
+        // Create directory if it doesn't exist
         if (!fs.existsSync(dir)){
             fs.mkdirSync(dir, { recursive: true });
         }
