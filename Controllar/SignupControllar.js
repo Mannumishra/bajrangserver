@@ -3,7 +3,6 @@ const Otp = require("../Model/OtpModel");
 const nodemailer = require('nodemailer');
 const fs = require("fs");
 const { uploadimage } = require('../Utils/Cloudnary');
-const puppeteer = require('puppeteer');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 
@@ -149,15 +148,6 @@ exports.signup = async (req, res) => {
     // Handle Offline Payment
     if (paymentMethod === "Offline") {
       const htmlContent = createHtmlContent(user);
-
-      // Use Puppeteer to generate PDF
-      const browser = await puppeteer.launch();
-      const page = await browser.newPage();
-      await page.setContent(htmlContent);
-      const pdfBuffer = await page.pdf({ format: 'A4' });
-      await browser.close();
-
-      // Send Email with PDF attachment
       const mailOptions = {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
@@ -170,7 +160,7 @@ exports.signup = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+        message: htmlContent
       };
 
       const adminMailOptions = {
@@ -178,7 +168,7 @@ exports.signup = async (req, res) => {
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
         text: 'A new member registration done successfully, please check the attachment of receipt.',
-        attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+        message: htmlContent
       };
 
       await transporter.sendMail(mailOptions);
@@ -229,13 +219,6 @@ exports.paymentVerification = async (req, res) => {
 
     // Create and send PDF receipt
     const htmlContent = createHtmlContent(user);
-
-    // Use Puppeteer to generate PDF
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.setContent(htmlContent);
-    const pdfBuffer = await page.pdf({ format: 'A4' });
-    await browser.close();
     const mailOptions = {
       from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       to: user.email,
@@ -248,7 +231,7 @@ exports.paymentVerification = async (req, res) => {
                  Warm regards, 
                  Bajrang Vahini Dal
           `,
-      attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+      message: htmlContent
     };
 
     const adminMailOptions = {
@@ -256,7 +239,7 @@ exports.paymentVerification = async (req, res) => {
       to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       subject: 'New Member Request And Receipt',
       text: 'A new member registration done successfully, please check the attachment of receipt.',
-      attachments: [{ filename: 'donation_receipt.pdf', content: pdfBuffer }],
+      message: htmlContent
     };
     await transporter.sendMail(mailOptions);
     await transporter.sendMail(adminMailOptions);
