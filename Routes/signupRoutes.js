@@ -1,11 +1,12 @@
 const express = require('express');
+const fs = require("fs")
 const { sendOtp, verifyOtp, signup, paymentVerification, getRecord, getSingleRecord } = require('../Controllar/SignupControllar');
 
 const multer = require("multer")
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = './Public/Images';
-        if (!fs.existsSync(dir)){
+        if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
         cb(null, dir);
