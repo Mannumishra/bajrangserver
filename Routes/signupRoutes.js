@@ -4,12 +4,17 @@ const { sendOtp, verifyOtp, signup, paymentVerification, getRecord, getSingleRec
 const multer = require("multer")
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './Public/Images')
+        const dir = './Public/Images';
+        if (!fs.existsSync(dir)){
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        cb(null, dir);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + file.originalname)
+        cb(null, Date.now() + '-' + file.originalname);
     }
-})
+});
+
 
 const upload = multer({ storage: storage })
 

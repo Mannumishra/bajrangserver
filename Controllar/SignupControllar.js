@@ -70,19 +70,25 @@ exports.signup = async (req, res) => {
     // Image Handling
     if (req.files) {
       const { image, adharcardFront, adharcardBack } = req.files;
-      if (image && image[0].path) {
-        user.image = await uploadimage(image[0].path);
-        fs.unlinkSync(image[0].path);
-      }
-      if (adharcardFront && adharcardFront[0].path) {
-        user.adharcardFront = await uploadimage(adharcardFront[0].path);
-        fs.unlinkSync(adharcardFront[0].path);
-      }
-      if (adharcardBack && adharcardBack[0].path) {
-        user.adharcardBack = await uploadimage(adharcardBack[0].path);
-        fs.unlinkSync(adharcardBack[0].path);
+      try {
+        if (image && image[0].path) {
+          user.image = await uploadimage(image[0].path);
+          fs.unlinkSync(image[0].path);
+        }
+        if (adharcardFront && adharcardFront[0].path) {
+          user.adharcardFront = await uploadimage(adharcardFront[0].path);
+          fs.unlinkSync(adharcardFront[0].path);
+        }
+        if (adharcardBack && adharcardBack[0].path) {
+          user.adharcardBack = await uploadimage(adharcardBack[0].path);
+          fs.unlinkSync(adharcardBack[0].path);
+        }
+      } catch (err) {
+        console.error('File upload error:', err);
+        return res.status(500).json({ success: false, message: 'File upload failed.' });
       }
     }
+
     await user.save();
     if (paymentMethod === "Offline") {
       res.status(200).json({ success: true, message: 'User donation successful.' });
