@@ -5,6 +5,7 @@ const fs = require("fs");
 const { uploadimage } = require('../Utils/Cloudnary');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
+const { text } = require('express');
 
 // Initialize Nodemailer
 const transporter = nodemailer.createTransport({
@@ -62,7 +63,7 @@ exports.verifyOtp = async (req, res) => {
 };
 
 const createHtmlContent = (user) => `
-  <div style="width: 600px; padding: 20px; background-color: #e6a15c; border: 2px solid #c0440d; border-radius: 10px;">
+  <div style="max-width: 100%; padding: 20px; background-color: #e6a15c; border: 2px solid #c0440d; border-radius: 10px; margin: auto; box-sizing: border-box;">
       <div style="text-align: center; margin-bottom: 20px;">
           <img src="https://bajrangvahinidal.com/static/media/1698868863_4b65b39f091f43c03be2.04be49a70e991ff03f4e.png" alt="बजरंग वाहिनी दल Logo" style="width: 100px; height: auto; margin-bottom: 10px;">
           <h1 style="font-size: 28px; margin: 0; color: #d02626;">बजरंग वाहिनी दल</h1>
@@ -105,20 +106,52 @@ const createHtmlContent = (user) => `
           <label style="font-size: 16px; color: #000;">आधार कार्ड नंबर:</label>
           <p style="font-size: 14px; padding: 8px; background-color: #fff; border-radius: 4px;">${user.adharnumber}</p>
       </div>
-      <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
-          <img src="${user.adharcardFront}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
-      </div>
-       <div style="margin-bottom: 15px;">
-          <label style="font-size: 16px; color: #000;">आधार कार्ड छवि:</label>
-          <img src="${user.adharcardBack}" alt="Aadhaar Card" style="width: 200px; height: auto; margin-top: 8px; background-color: #fff; border-radius: 4px;">
-      </div>
       <div style="text-align: right; margin-top: 20px;">
           <img src="https://res.cloudinary.com/dsimn9z1r/image/upload/fl_preserve_transparency/v1723179469/WhatsApp_Image_2024-08-09_at_10.19.27-removebg_ozu41s.jpg?_s=public-apps" alt="Signature" style="width: 100px; height: auto; margin-bottom: 5px;">
           <p style="font-size: 18px; color: #000;">अधिकृत हस्ताक्षर</p>
       </div>
+      <style>
+        @media (max-width: 600px) {
+          .container {
+            width: 100% !important;
+            padding: 10px !important;
+          }
+          .container img {
+            width: 100% !important;
+            height: auto !important;
+          }
+          .container h1 {
+            font-size: 24px !important;
+          }
+          .container p {
+            font-size: 12px !important;
+          }
+          .container label {
+            font-size: 14px !important;
+          }
+        }
+      </style>
   </div>
 `;
+
+// const textContentuser = (user) => `
+//   Dear ${user.name},
+  
+//   I hope this message finds you well.
+//   On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
+  
+//   Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
+  
+//   Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
+  
+//   Warm regards,
+//   Bajrang Vahini Dal
+// `;
+
+
+// const textContentadmin = `
+  
+// `;
 
 
 exports.signup = async (req, res) => {
@@ -152,14 +185,6 @@ exports.signup = async (req, res) => {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: user.email,
         subject: 'Thank You for Joining Bajrang Vahini Dal',
-        text: `Dear [${user.name}],
-                 I hope this message finds you well.
-                 On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
-                 Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
-                 Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
-                 Warm regards, 
-                 Bajrang Vahini Dal
-          `,
         html: htmlContent
       };
 
@@ -167,8 +192,7 @@ exports.signup = async (req, res) => {
         from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
         subject: 'New Member Request And Receipt',
-        text: 'A new member registration done successfully, please check the attachment of receipt.',
-        html: htmlContent
+        text: `A new member registration done successfully, please check the attachment of receipt.`,
       };
 
       await transporter.sendMail(mailOptions);
@@ -223,14 +247,6 @@ exports.paymentVerification = async (req, res) => {
       from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       to: user.email,
       subject: 'Thank You for Joining Bajrang Vahini Dal',
-      text: `Dear [${user.name}],
-                 I hope this message finds you well.
-                 On behalf of Bajrang Vahini Dal, I would like to extend our heartfelt gratitude for your recent decision to become a member of our esteemed organization. Your commitment and support are invaluable to us, and we are thrilled to welcome you into our community.
-                 Please do not hesitate to reach out if you have any questions or need further information. We are here to assist you and ensure that your experience with Bajrang Vahini Dal is both fulfilling and rewarding.
-                 Once again, thank you for your commitment. We are excited to have you with us and look forward to achieving great things together.
-                 Warm regards, 
-                 Bajrang Vahini Dal
-          `,
       html: htmlContent
     };
 
@@ -238,8 +254,7 @@ exports.paymentVerification = async (req, res) => {
       from: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       to: process.env.EMAIL_SEND || "bajrangvahinidal@gmail.com",
       subject: 'New Member Request And Receipt',
-      text: 'A new member registration done successfully, please check the attachment of receipt.',
-      html: htmlContent
+      text: `A new member registration done successfully, please check the attachment of receipt.`,
     };
     await transporter.sendMail(mailOptions);
     await transporter.sendMail(adminMailOptions);
